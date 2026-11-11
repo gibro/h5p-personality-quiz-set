@@ -53,7 +53,7 @@ export default class ExportPDF {
       const { image, size } = this.getSizedImageBlob({
         pdf: pdf,
         blob: blobs[0],
-        maxHeightMM: contentGeometry.height
+        maxHeightMM: contentGeometry.height - ExportPDF.PAGE_MARGIN_MM
       });
 
       const totalImageSpace = size.height + ExportPDF.PAGE_MARGIN_MM;
@@ -172,7 +172,7 @@ export default class ExportPDF {
     // Describes rect between header and footer incl. margin to both
     return {
       x: ExportPDF.PAGE_MARGIN_MM,
-      y: footerGeometry.height + ExportPDF.PAGE_MARGIN_MM,
+      y: headerGeometry.y + headerGeometry.height + ExportPDF.PAGE_MARGIN_MM,
       width: ExportPDF.PAGE_WIDTH_MAX_MM,
       height: ExportPDF.PAGE_HEIGHT_MAX_MM - ExportPDF.PAGE_MARGIN_MM -
         headerGeometry.height - footerGeometry.height
