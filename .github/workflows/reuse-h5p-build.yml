@@ -2,9 +2,9 @@ name: Build H5P content type
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main, unbranded ]
   pull_request:
-    branches: [ master ]
+    branches: [ main, unbranded ]
 
 jobs:
   build:
