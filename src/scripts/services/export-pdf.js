@@ -39,18 +39,27 @@ export default class ExportPDF {
       footerBlob: footerBlob
     });
 
+    // Header and footer leave no room for content, stop instead of looping
+    if (!contentGeometry || contentGeometry.height <= 0) {
+      return;
+    }
+
     let remainingHeightMM = contentGeometry.height;
 
     while (remainingHeightMM > 0 && blobs.length) {
+      const isPageEmpty = remainingHeightMM === contentGeometry.height;
+
+      // Only scale down images that would not even fit on an empty page
       const { image, size } = this.getSizedImageBlob({
         pdf: pdf,
         blob: blobs[0],
-        maxHeightMM: remainingHeightMM
+        maxHeightMM: contentGeometry.height
       });
 
       const totalImageSpace = size.height + ExportPDF.PAGE_MARGIN_MM;
 
-      if (totalImageSpace <= remainingHeightMM) {
+      // An image on an empty page is always placed, so every page makes progress
+      if (totalImageSpace <= remainingHeightMM || isPageEmpty) {
         pdf.addImage(
           image, 'PNG',
           contentGeometry.x,
