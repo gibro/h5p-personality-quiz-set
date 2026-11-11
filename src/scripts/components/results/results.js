@@ -1,4 +1,3 @@
-import Screenshot from '@services/screenshot';
 import Util from '@services/util.js';
 import ChatMessage from '@components/chat-message/chat-message.js';
 import './results.scss';
@@ -135,7 +134,8 @@ export default class Results {
         if (personalityText.length > 0 && personalityText.slice(-1) !== ' ') {
           personalityText = `${personalityText} `;
         }
-        personalityText = `${personalityText}${Util.purifyHTML(result.personality)}`;
+        personalityText =
+          `${personalityText}${Util.purifyHTML(result.personality)}`;
 
         result.personality = personalityText;
       }
@@ -151,37 +151,41 @@ export default class Results {
   }
 
   /**
-   * Get results.
-   * @returns {object} Results.
+   * Get results dom prepared for export.
+   * @returns {HTMLElement} Results DOM for export.
    */
-  async getResults() {
-    const results = [];
+  getExport() {
+    const resultsDOM = this.resultsDOM.cloneNode(true);
 
-    const domClone = this.dom.cloneNode(true);
-    domClone.classList.add('offscreen');
-    document.body.append(domClone);
+    resultsDOM.style.background = '#ffffff';
+    resultsDOM.style.boxShadow = 'none';
+    resultsDOM.style.padding = '0';
 
-    // Create clone of results, set to fixed width off screen, take shots
-    const panels = domClone
-      .querySelector('ul.h5p-personality-quiz-set-results-panels');
-    panels.classList.add('export');
-
-    const doms = [...panels.childNodes];
-
-    await Util.delay(0);
-
-    for (let i = 0; i < doms.length; i++) {
-      const screenshot = await Screenshot.takeScreenshot(
-        { element: doms[i], enforceImage: true }
-      );
-
-      results.push(screenshot);
+    const title = resultsDOM.querySelector(
+      '.h5p-personality-quiz-set-results-panel-title'
+    );
+    if (title) {
+      title.style.fontSize = '1.5rem';
+      title.style.fontWeight = 'bold';
+      title.style.marginBottom = '1rem';
     }
 
-    domClone.remove();
-    panels.classList.remove('export');
+    const personalities = resultsDOM.querySelectorAll(
+      '.h5p-personality-quiz-set-results-panel-personality'
+    );
+    personalities.forEach((personality) => {
+      personality.style.fontStyle = 'italic';
+      personality.style.marginBottom = '0.5rem';
+    });
 
-    return results;
+    const panels = resultsDOM.querySelectorAll(
+      '.h5p-personality-quiz-set-results-panel'
+    );
+    panels.forEach((panel) => {
+      panel.style.marginBottom = '2rem';
+    });
+
+    return resultsDOM;
   }
 
   /**

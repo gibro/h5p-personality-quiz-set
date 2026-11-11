@@ -11,13 +11,13 @@ export default class Header {
     this.dom = document.createElement('div');
     this.dom.classList.add('h5p-personality-quiz-set-header');
 
-    this.awplusLogo = document.createElement('div');
+    /*this.awplusLogo = document.createElement('div');
     this.awplusLogo.classList.add('h5p-personality-quiz-set-header-logo-awplus');
     this.dom.append(this.awplusLogo);
 
     this.igmLogo = document.createElement('div');
     this.igmLogo.classList.add('h5p-personality-quiz-set-header-logo-igm');
-    this.dom.append(this.igmLogo);
+    this.dom.append(this.igmLogo);*/
   }
 
   /**
@@ -29,10 +29,10 @@ export default class Header {
   }
 
   /**
-   * Get as image blob. Needs to be attached to DOM!
-   * @returns {Blob} Image blob.
+   * Get base64 image representation.
+   * @returns {string} Base64 image representation.
    */
-  async getBlob() {
+  async getBase64() {
     const domClone = this.dom.cloneNode(true);
     domClone.classList.add('export');
     domClone.classList.add('offscreen');
@@ -41,7 +41,7 @@ export default class Header {
     await Util.delay(0);
 
     const screenshot = await Screenshot.takeScreenshot(
-      { element: domClone, enforceImage: true }
+      { element: domClone, enforceImage: true, format: 'base64' }
     );
 
     domClone.remove();

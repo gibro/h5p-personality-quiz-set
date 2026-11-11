@@ -1,4 +1,5 @@
 .h5p-personality-quiz-set-chat-message-container {
+  box-sizing: border-box;
   margin-bottom: 0.5rem;
   padding: 1rem;
   width: min(100%, 60em);
@@ -11,6 +12,7 @@
     background-color: #eeeeee;
     border-radius: 1rem 1rem 1rem 0;
     box-shadow: 0.125rem 0.125rem 0.25rem rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
     font-weight: normal;
     line-height: 1rem;
     margin-left: 2.5rem;
@@ -28,6 +30,7 @@
     }
 
     .typing-animation-dots {
+      box-sizing: border-box;
       padding: calc(0.25rem + 1px) 0;
       height: 1rem;
 

@@ -403,11 +403,12 @@ export default class Main {
 
     window.requestAnimationFrame(async () => {
       // Pass results to export
-      const headerBlob = await this.header.getBlob();
-      const footerBlob = await this.footer.getBlob();
-      const resultsBlobs = await this.results.getResults();
+      const headerBase = await this.header.getBase64();
+      const footerBase = await this.footer.getBase64();
+      const results = await this.results.getExport();
 
-      await this.pdfExporter.export({ resultsBlobs, headerBlob, footerBlob });
+      await this.pdfExporter.export({ results, headerBase, footerBase });
+
       this.setExportingState(false);
     });
   }

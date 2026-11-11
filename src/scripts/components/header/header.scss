@@ -12,7 +12,7 @@
   }
 
   background-color: rgb(27, 37, 43);
-  display: flex;
+  display: none;
   flex-direction: row;
   gap: 2rem;
   justify-content: space-between;
@@ -20,7 +20,6 @@
   padding: 1rem;
 
   .h5p-personality-quiz-set-header-logo-awplus {
-    display: none;
     background-image: url("@assets/logo-awplus.png");
     background-position-y: center;
     background-repeat: no-repeat;

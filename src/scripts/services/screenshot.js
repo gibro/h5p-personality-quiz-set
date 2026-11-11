@@ -8,12 +8,12 @@ export default class Screenshot {
    * @param {HTMLElement} [params.element] Element to
    *   take screenshot from.
    * @param {boolean} [params.enforceImage] If true, always return some image.
-   * @returns {Blob} Image blob.
+   * @param {string} [params.format] Format of the image: blob|base64.
+   * @returns {Blob|string} Image blob or base64 string.
    */
   static async takeScreenshot(params = {}) {
-    if (!params.element) {
-      params.element = document.body; // Could have been null
-    }
+    params.element = params.element ?? document.body;
+    params.format = params.format ?? 'blob';
 
     const canvas = await html2canvas(params.element);
     if (params.enforceImage &&
@@ -25,9 +25,17 @@ export default class Screenshot {
     }
 
     return await new Promise((resolve) => {
-      canvas.toBlob((blob) => {
-        resolve(blob);
-      }, 'image/png');
+      if (params.format === 'base64') {
+        resolve(canvas.toDataURL('image/png'));
+      }
+      else if (params.format === 'blob') {
+        canvas.toBlob((blob) => {
+          resolve(blob);
+        }, 'image/png');
+      }
+      else {
+        return new Blob([], { type: 'image/png' });
+      }
     });
   }
 }

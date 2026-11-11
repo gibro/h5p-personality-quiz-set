@@ -4,10 +4,6 @@ html {
   box-sizing: border-box;
 }
 
-*, *:before, *:after {
-  box-sizing: inherit;
-}
-
 .h5p-personality-quiz {
   --color-box-shadow: rgb(166 166 166 / 20%);
   --color-disabled: rgb(128 128 128 / 95%);

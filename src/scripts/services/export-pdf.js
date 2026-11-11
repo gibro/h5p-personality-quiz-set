@@ -1,4 +1,4 @@
-import { jsPDF } from 'jspdf';
+import html2pdf from 'html2pdf.js';
 
 export default class ExportPDF {
   /**
@@ -11,198 +11,82 @@ export default class ExportPDF {
    * @param {object} [params] Parameters of export.
    * @param {string} params.filename Filename for export.
    */
-  export(params = {}) {
+  async export(params = {}) {
     params.filename = params.filename ||
-      `${H5P.createUUID()}-${Date.now()}.pdf`;
+    `${H5P.createUUID()}-${Date.now()}.pdf`;
 
-    const pdf = new jsPDF();
-    pdf.deletePage(1); // Start with a clean slate to keep code simpler
+    const headerSize = await this.getImageDimensions(params.headerBase);
+    const headerHeightMM = headerSize.height / ExportPDF.MM_EQUALS_PX;
 
-    this.fillDocument(
-      pdf, params.resultsBlobs, params.headerBlob, params.footerBlob
-    );
+    const footerSize = await this.getImageDimensions(params.footerBase);
+    const footerHeightMM = footerSize.height / ExportPDF.MM_EQUALS_PX;
 
-    pdf.save(params.filename);
-  }
+    html2pdf().from(params.results).set({
+      margin: [
+        headerHeightMM + ExportPDF.PAGE_MARGIN_MM,
+        10,
+        footerHeightMM + ExportPDF.PAGE_MARGIN_MM,
+        10
+      ],
+      filename: params.filename,
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+    }).toPdf().get('pdf').then(async (pdf) => {
+      const totalPages = pdf.internal.getNumberOfPages();
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
 
-  /**
-   * Fill document with blobs.
-   * @param {jsPDF} pdf JSPDF object.
-   * @param {Blob[]} blobs Results blobs.
-   * @param {Blob} headerBlob Header blob.
-   * @param {Blob} footerBlob Footer blob.
-   */
-  fillDocument(pdf, blobs, headerBlob, footerBlob) {
-    const contentGeometry = this.addPage({
-      pdf,
-      headerBlob: headerBlob,
-      footerBlob: footerBlob
-    });
+      const headerHeight = (pdfWidth / headerSize.width) * headerSize.height;
+      const footerHeight = (pdfWidth / footerSize.width) * footerSize.height;
 
-    let remainingHeightMM = contentGeometry.height;
+      for (let i = 1; i <= totalPages; i++) {
+        pdf.setPage(i);
 
-    while (remainingHeightMM > 0 && blobs.length) {
-      const { image, size } = this.getSizedImageBlob({
-        pdf: pdf,
-        blob: blobs[0],
-        maxHeightMM: remainingHeightMM
-      });
-
-      const totalImageSpace = size.height + ExportPDF.PAGE_MARGIN_MM;
-
-      if (totalImageSpace <= remainingHeightMM) {
         pdf.addImage(
-          image, 'PNG',
-          contentGeometry.x,
-          contentGeometry.y + contentGeometry.height - remainingHeightMM,
-          size.width,
-          size.height
+          params.headerBase,
+          'PNG',
+          0,
+          0,
+          pdfWidth,
+          headerHeight
         );
-
-        blobs.shift();
+        pdf.addImage(
+          params.footerBase,
+          'PNG',
+          0,
+          pdfHeight - footerHeight,
+          pdfWidth,
+          footerHeight
+        );
       }
-
-      remainingHeightMM = remainingHeightMM - totalImageSpace;
-    }
-
-    if (blobs.length) {
-      this.fillDocument(pdf, blobs, headerBlob, footerBlob);
-    }
+    }).save();
   }
 
   /**
-   * Get sized image blob.
-   * @param {object} [params] Parameters.
-   * @param {jsPDF} params.pdf PDF document.
-   * @param {Blob} params.blob Blob of header image.
-   * @param {number} [params.maxWidthMM] Maximum width in mm.
-   * @param {number} [params.maxHeightMM] Maximum height in mm.
-   * @returns {object} HTMLImage element and its scaled size.
+   * Get image dimensions.
+   * @param {string} base64String Base64 string.
+   * @returns {Promise<object>} Image dimensions.
    */
-  getSizedImageBlob(params = {}) {
-    params.maxWidthMM = params.maxWidthMM ?? ExportPDF.PAGE_WIDTH_MAX_MM;
+  async getImageDimensions(base64String) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
 
-    const image = document.createElement('img');
-    image.src = URL.createObjectURL(params.blob);
-
-    const imageSize = params.pdf.getImageProperties(image);
-    const imageRatio = imageSize.width / imageSize.height;
-
-    // Determine image size at full width
-    let size = {
-      width: params.maxWidthMM,
-      height: params.maxWidthMM / imageRatio
-    };
-
-    // Use maximum height as limiting factor and scale width down
-    if (params.maxHeightMM && size.height > params.maxHeightMM) {
-      size = {
-        width: params.maxHeightMM * imageRatio,
-        height: params.maxHeightMM
-      };
-    }
-
-    return { image, size };
-  }
-
-  /**
-   * Add page including header/footer.
-   * @param {object} params Parameters.
-   * @param {jsPDF} params.pdf PDF document.
-   * @param {Blob} [params.headerBlob] Blob of header image.
-   * @param {Blob} [params.footerBlob] Blob of footer image.
-   * @returns {object|undefined} Remaining content geometry or undefined.
-   */
-  addPage({ pdf, headerBlob, footerBlob }) {
-    if (!pdf) {
-      return;
-    }
-
-    pdf.addPage();
-
-    let headerGeometry = { x: 0, y: 0, width: 0, height: 0 };
-    let footerGeometry = { x: 0, y: 0, width: 0, height: 0 };
-
-    // Header
-    if (headerBlob) {
-      const { image, size } = this.getSizedImageBlob({ pdf, blob: headerBlob });
-
-      headerGeometry = {
-        x: ExportPDF.PAGE_MARGIN_MM,
-        y: ExportPDF.PAGE_MARGIN_MM + ExportPDF.PAGE_HEIGHT_MAX_MM -
-          ExportPDF.PAGE_HEIGHT_MAX_MM,
-        width: size.width,
-        height: size.height
+      img.onload = () => {
+        resolve({ width: img.width, height: img.height });
       };
 
-      pdf.addImage(
-        image, 'PNG',
-        headerGeometry.x, headerGeometry.y,
-        headerGeometry.width, headerGeometry.height
-      );
-    }
-
-    // Footer
-    if (footerBlob) {
-      const { image, size } = this.getSizedImageBlob({ pdf, blob: footerBlob });
-
-      footerGeometry = {
-        x: ExportPDF.PAGE_MARGIN_MM,
-        y: ExportPDF.PAGE_MARGIN_MM + ExportPDF.PAGE_HEIGHT_MAX_MM - size.height,
-        width: size.width,
-        height: size.height
+      img.onerror = () => {
+        reject(new Error('Failed to load the image'));
       };
 
-      pdf.addImage(
-        image, 'PNG',
-        footerGeometry.x, footerGeometry.y,
-        footerGeometry.width, footerGeometry.height
-      );
-    }
-
-    // Describes rect between header and footer incl. margin to both
-    return {
-      x: ExportPDF.PAGE_MARGIN_MM,
-      y: footerGeometry.height + ExportPDF.PAGE_MARGIN_MM,
-      width: ExportPDF.PAGE_WIDTH_MAX_MM,
-      height: ExportPDF.PAGE_HEIGHT_MAX_MM - ExportPDF.PAGE_MARGIN_MM -
-        headerGeometry.height - footerGeometry.height
-    };
-  }
-
-  /**
-   * Get image from blob.
-   * @param {Blob} imageBlob Image blob.
-   * @returns {HTMLElement|null} Image element or null if error.
-   */
-  async getImage(imageBlob) {
-    return await new Promise((resolve, reject) => {
-      const image = document.createElement('img');
-      image.addEventListener('load', () => {
-        resolve(image);
-      });
-      image.addEventListener('error', () => {
-        reject(null);
-      });
-      image.src = URL.createObjectURL(imageBlob);
+      img.src = base64String;
     });
   }
 }
 
-/** @constant {number} Page width in mm. */
-ExportPDF.PAGE_WIDTH_MM = 210; // 210 is DinA4 width in mm
-
-/** @constant {number} Page height in mm. */
-ExportPDF.PAGE_HEIGHT_MM = 297; // 297 is DinA4 height in mm
-
 /** @constant {number} Default gap between elements in mm. */
 ExportPDF.PAGE_MARGIN_MM = 10; // Default gap between elements in mm
-
-/** @constant {number} Max width in mm. */
-ExportPDF.PAGE_WIDTH_MAX_MM = ExportPDF.PAGE_WIDTH_MM - 2 * ExportPDF.PAGE_MARGIN_MM;
-
-/** @constant {number} Max width in mm. */
-ExportPDF.PAGE_HEIGHT_MAX_MM = ExportPDF.PAGE_HEIGHT_MM - 2 * ExportPDF.PAGE_MARGIN_MM;
 
 /** @constant {number} Pixels that equal one mm */
 ExportPDF.MM_EQUALS_PX = 3.7795275591;
