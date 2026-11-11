@@ -2,6 +2,10 @@
 
 H5P Personality Quiz Set for IG Metall.
 
+## Unbranded variant
+
+The branch [unbranded](https://github.com/gibro/h5p-personality-quiz-set/tree/unbranded) contains an unbranded variant of this content type: header and footer are hidden, and the PDF export and the results view are adjusted. It also adds build tooling (ESLint, Stylelint) and a GitHub Actions workflow. This variant was previously maintained as a separate repository, h5p-personality-quiz-set-unbranded.
+
 ## Getting started
 Clone this repository with git and check out the branch that you are interested
 in (or choose the branch first and then download the archive, but learning
