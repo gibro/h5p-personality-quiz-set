@@ -1,0 +1,123 @@
+{
+  "semantics": [
+    {
+      "label": "Show title screen",
+      "description": "If checked, a title screen will show up when starting."
+    },
+    {
+      "label": "Title Screen",
+      "fields": [
+        {
+          "label": "Introduction",
+          "default": "<p style=\"text-align: center;\"></p>"
+        },
+        {
+          "label": "Title screen medium"
+        }
+      ]
+    },
+    {
+      "label": "List of contents",
+      "widgets": [
+        {
+          "label": "Default"
+        }
+      ],
+      "entity": "content",
+      "field": {
+        "fields": [
+          {
+            "label": "Introductory text",
+            "description": "Optional introductory text before this quiz starts."
+          },
+          {
+            "label": "Content"
+          },
+          {
+            "label": "Closing text",
+            "description": "Optional closing text after this quiz is completed."
+          },
+          {
+            "label": "Results title",
+            "description": "Optional title to lead this quizzes results with."
+          }
+        ]
+      }
+    },
+    {
+      "label": "Results settings",
+      "fields": [
+        {
+          "label": "Show personality type name",
+          "description": "Check to show personality type name within results. Will show automatically if no personality type description is entered or no image is set."
+        },
+        {
+          "label": "Personality type name prefix",
+          "description": "Optionally put this prefix in front of the personality type name.",
+          "default": "Personality type:"
+        }
+      ]
+    },
+    {
+      "label": "Visual settings",
+      "fields": [
+        {
+          "label": "Show progress bar",
+          "description": "Check to show progress bar."
+        },
+        {
+          "label": "Base color",
+          "description": "Set the base color that will determine the color for visual elements.",
+          "default": "#e05c00"
+        }
+      ]
+    },
+    {
+      "label": "User interface",
+      "fields": [
+        {
+          "label": "Text in progress bar",
+          "description": "@current and @total are placeholders and will be replaced with the respective values.",
+          "default": "@current of @total"
+        },
+        {
+          "label": "Content without a title",
+          "default": "Untitled"
+        },
+        {
+          "label": "Introductory message for results",
+          "default": "Here are your results:"
+        },
+        {
+          "label": "Label of \"Start\" button",
+          "default": "Start"
+        },
+        {
+          "label": "Label of \"Restart\" button",
+          "default": "Restart"
+        },
+        {
+          "label": "Label of \"Export PDF\" button",
+          "default": "Export PDF"
+        },
+        {
+          "label": "Footer text",
+          "default": "This research and development project is funded by the German Federal Ministry of Education and Research (BMBF) in the program \"Future of Value Creation - Research on Production, Service and Work\" and is supervised by the Project Management Agency Karlsruhe (PTKA). The responsibility for the content of this publication lies with the author."
+        }
+      ]
+    },
+    {
+      "label": "Accessibility texts",
+      "fields": [
+        {
+          "label": "Progress bar",
+          "default": "Progress bar"
+        },
+        {
+          "label": "Title screen opened",
+          "default": "The title screen was opened."
+        }
+      ]
+    }
+  ]
+}

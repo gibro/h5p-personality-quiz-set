@@ -1,0 +1,23 @@
+{
+  "root": true,
+  "env": {
+    "browser": true,
+    "es2022": true
+  },
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module"
+  },
+  "globals": {
+    "H5P": "readonly",
+    "H5PIntegration": "readonly"
+  },
+  "plugins": ["jsdoc"],
+  "extends": [
+    "eslint:recommended",
+    "plugin:jsdoc/recommended"
+  ],
+  "rules": {
+    "jsdoc/check-types": ["warn", { "noDefaults": true }]
+  }
+}
